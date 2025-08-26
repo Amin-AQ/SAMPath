@@ -132,7 +132,8 @@ def main(cfg, args):
     # Stack predictions across batches
     pred_masks = torch.cat([p[0] for p in pred_list], dim=0).cpu()
     iou_predictions = torch.cat([p[1] for p in pred_list], dim=0).cpu()
-
+ 
+ 
     print(f'Pred Mask: {pred_masks.shape}')
     print(f'IOU Predictions: {iou_predictions.shape}')
     os.makedirs(args.output_dir, exist_ok=True)
