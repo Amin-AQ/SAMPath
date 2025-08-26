@@ -127,9 +127,12 @@ def main(cfg, args):
                       accumulate_grad_batches=accumulate_grad_batches,
                       fast_dev_run=False)
 
-    pred_masks, iou_predictions = trainer.predict(pl_module, dataloaders=dataloader)
-    pred_masks = torch.cat(pred_masks, dim=0).cpu()
-    iou_predictions = torch.cat(iou_predictions, dim=0).cpu()
+    pred_list = trainer.predict(pl_module, dataloaders=dataloader)  # list of tuples per batch
+
+    # Stack predictions across batches
+    pred_masks = torch.cat([p[0] for p in pred_list], dim=0).cpu()
+    iou_predictions = torch.cat([p[1] for p in pred_list], dim=0).cpu()
+
     print(f'Pred Mask: {pred_masks.shape}')
     print(f'IOU Predictions: {iou_predictions.shape}')
     os.makedirs(args.output_dir, exist_ok=True)
