@@ -56,7 +56,7 @@ def get_model(cfg, pretrained=None):
         no_sam=cfg.model.no_sam if "no_sam" in cfg.model else None
     )
     if pretrained is not None:
-        state_dict = torch.load(pretrained, map_location='cpu')['state_dict']
+        state_dict = torch.load(pretrained, map_location='cuda', weights_only=False)['state_dict']
         state_dict = {k[len('model.'):]:v for k, v in state_dict.items() if k.startswith('model.')}
         msg = model.load_state_dict(state_dict, strict=False)
         print("Loading weights from %s got msg: %s" % (pretrained, msg))
@@ -127,14 +127,19 @@ def main(cfg, args):
                       accumulate_grad_batches=accumulate_grad_batches,
                       fast_dev_run=False)
 
-    pred_masks = trainer.predict(pl_module, dataloaders=dataloader)
+    pred_masks, iou_predictions = trainer.predict(pl_module, dataloaders=dataloader)
     pred_masks = torch.cat(pred_masks, dim=0).cpu()
-    print(pred_masks.shape)
+    iou_predictions = torch.cat(iou_predictions, dim=0).cpu()
+    print(f'Pred Mask: {pred_masks.shape}')
+    print(f'IOU Predictions: {iou_predictions.shape}')
     os.makedirs(args.output_dir, exist_ok=True)
-    for f, pmask in zip(dataset.img_list, pred_masks):
+    for f, pmask, score in zip(dataset.img_list, pred_masks, iou_predictions):
         pmask = pmask.numpy().astype(np.uint8)
         out_f = os.path.join(args.output_dir, f[:-len(args.data_ext)] + "_mask.png")
         cv2.imwrite(out_f, pmask)
+
+        scores = score.cpu().numpy()
+        np.save(os.path.join(args.output_dir, f[:-len(args.data_ext)] + "_iou.npy"), scores)
 
 
 if __name__ == '__main__':

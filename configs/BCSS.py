@@ -15,7 +15,7 @@ config = {
     },
     "model": {
         "type": 'vit_b',
-        "checkpoint": "/data07/shared/jzhang/result/weights/SAM/sam_vit_b_01ec64.pth",
+        "checkpoint": "/kaggle/input/sampath-model-weights/pytorch/default/1/model.ckpt",
         "freeze": {
             "image_encoder": True,
             "prompt_encoder": True,
@@ -43,7 +43,7 @@ config = {
 
         "ignored_classes": (0),
         "ignored_classes_metric": None, # if we do not count background, set to 1 (bg class)
-        "image_hw": (1024, 1024), # default is 1024, 1024
+        "image_hw": (512, 512), # default is 1024, 1024
 
         "feature_input": False, # or "True" for *.pt features
         "dataset_mean": (0.485, 0.456, 0.406),
